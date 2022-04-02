@@ -1,5 +1,3 @@
-import axios from "axios";
-
 type TezosContractAddress = `KT1${string}`;
 type TezosAccountAddress = `tz${"1" | "2" | "3"}${string}`;
 export enum tokenType {

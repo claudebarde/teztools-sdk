@@ -116,7 +116,7 @@ export class TezToolsSDK {
     if (window) {
       // browser usage
       this.fetch = async (url: string) => {
-        const res = await this.fetch(url);
+        const res = await fetch(url);
         if (res) {
           return await res.json();
         } else {

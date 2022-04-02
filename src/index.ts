@@ -177,9 +177,8 @@ export class TezToolsSDK {
     if (prices) {
       // fetches tokens prices
       try {
-        const response = await axios.get(this.pricesApiUrl);
-        if (response) {
-          const data = await response.data;
+        const data = await this.fetch(this.pricesApiUrl);
+        if (data) {
           if (typeof data !== "object") {
             throw `Expected object from token prices API, got ${typeof data}`;
           } else if (
@@ -593,9 +592,8 @@ export class TezToolsSDK {
     if (xtzPrice) {
       // fetches XTZ price
       try {
-        const response = await axios.get(this.xtzPriceUrl);
-        if (response) {
-          const data = await response.data;
+        const data = await this.fetch(this.xtzPriceUrl);
+        if (data) {
           // empty object for data
           let xtzPrice: xtzPrice = {
             fullData: true,
@@ -645,6 +643,20 @@ export class TezToolsSDK {
     }
 
     return this;
+  }
+
+  /**
+   * This is just an alias for the "init" method to fetch new prices and data
+   * @param {Object[prices: boolean; xtzPrice: boolean; defaultFiat: string; fiatExchangeRate: number]} params Option to choose data fetched by the instance
+   * @return {Promise<TezToolsPrices>} A promise with an instance of the class
+   */
+  async refresh(p?: {
+    prices?: boolean;
+    xtzPrice?: boolean;
+    defaultFiat?: string;
+    fiatExchangeRate?: number;
+  }): Promise<TezToolsSDK> {
+    return await this.init(p);
   }
 
   /**

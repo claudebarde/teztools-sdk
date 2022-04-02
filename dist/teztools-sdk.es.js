@@ -42,10 +42,10 @@ class TezToolsSDK {
       };
     } else {
       this.fetch = async (url) => {
-        const axios2 = (await import("./index.js").then(function(n) {
+        const axios = (await import("./index.js").then(function(n) {
           return n.i;
         })).default;
-        const res = await axios2.get(url);
+        const res = await axios.get(url);
         if (res) {
           return res.data;
         } else {
@@ -81,9 +81,8 @@ class TezToolsSDK {
     const fiatExchangeRate = p && p.fiatExchangeRate ? p.fiatExchangeRate : void 0;
     if (prices) {
       try {
-        const response = await axios.get(this.pricesApiUrl);
-        if (response) {
-          const data = await response.data;
+        const data = await this.fetch(this.pricesApiUrl);
+        if (data) {
           if (typeof data !== "object") {
             throw `Expected object from token prices API, got ${typeof data}`;
           } else if (typeof data === "object" && !data.hasOwnProperty("contracts")) {
@@ -414,9 +413,8 @@ class TezToolsSDK {
     }
     if (xtzPrice) {
       try {
-        const response = await axios.get(this.xtzPriceUrl);
-        if (response) {
-          const data = await response.data;
+        const data = await this.fetch(this.xtzPriceUrl);
+        if (data) {
           let xtzPrice2 = {
             fullData: true,
             price: null,
@@ -457,6 +455,9 @@ class TezToolsSDK {
       }
     }
     return this;
+  }
+  async refresh(p) {
+    return await this.init(p);
   }
   updateInternalFiat(symbol, exchangeRate) {
     this.defaultFiat = symbol;

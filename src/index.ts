@@ -1,6 +1,8 @@
+import axios from "axios";
+
 type TezosContractAddress = `KT1${string}`;
 type TezosAccountAddress = `tz${"1" | "2" | "3"}${string}`;
-enum tokenType {
+export enum tokenType {
   FA12 = "fa1.2",
   FA2 = "fa2",
   XTZ = "XTZ"
@@ -97,7 +99,7 @@ const validateAddress = (address: any): boolean => {
   }
 };
 
-export default class TezToolsPrices {
+export class TezToolsSDK {
   pricesApiUrl = "https://api.teztools.io/v1/prices";
   xtzPriceUrl = "https://api.teztools.io/v1/xtz-price";
   xtzPrice: xtzPrice | undefined = undefined;
@@ -106,6 +108,7 @@ export default class TezToolsPrices {
   defaultFiat = "USD";
   xtzExchangeRate: number | null | undefined = undefined;
   tokenTags: Array<string> = [];
+  numberOfTokens = 0;
 
   constructor() {
     this.tokensPrices = [];
@@ -138,12 +141,12 @@ export default class TezToolsPrices {
    * @param {Object[prices: boolean; xtzPrice: boolean; defaultFiat: string; fiatExchangeRate: number]} params Option to choose data fetched by the instance
    * @return {Promise<TezToolsPrices>} A promise with an instance of the class
    */
-  async setup(p?: {
+  async init(p?: {
     prices?: boolean;
     xtzPrice?: boolean;
     defaultFiat?: string;
     fiatExchangeRate?: number;
-  }): Promise<TezToolsPrices> {
+  }): Promise<TezToolsSDK> {
     const prices = p && p.prices ? p.prices : true;
     const xtzPrice = p && p.xtzPrice ? p.xtzPrice : true;
     const defaultFiat = p && p.defaultFiat ? p.defaultFiat : "USD";
@@ -152,9 +155,9 @@ export default class TezToolsPrices {
     if (prices) {
       // fetches tokens prices
       try {
-        const response = await fetch(this.pricesApiUrl);
+        const response = await axios.get(this.pricesApiUrl);
         if (response) {
-          const data = await response.json();
+          const data = await response.data;
           if (typeof data !== "object") {
             throw `Expected object from token prices API, got ${typeof data}`;
           } else if (
@@ -170,6 +173,7 @@ export default class TezToolsPrices {
             throw `Expected contracts property from token prices API to be an array, got ${typeof data.contracts} instead`;
           } else {
             // right format
+            this.numberOfTokens = data.contracts.length;
             data.contracts.forEach((contract: TokenData) => {
               let token: TokenData = {
                 symbol: null,
@@ -567,9 +571,9 @@ export default class TezToolsPrices {
     if (xtzPrice) {
       // fetches XTZ price
       try {
-        const response = await fetch(this.xtzPriceUrl);
+        const response = await axios.get(this.xtzPriceUrl);
         if (response) {
-          const data = await response.json();
+          const data = await response.data;
           // empty object for data
           let xtzPrice: xtzPrice = {
             fullData: true,
@@ -597,7 +601,8 @@ export default class TezToolsPrices {
               if (key === "updated" && this.is_timestamp(data[key])) {
                 xtzPrice.updated = data.updated;
               } else if (this.is_number(data[key])) {
-                xtzPrice[key] = +data[key];
+                // HACK: find a proper way to type xtzPrice[key]
+                (xtzPrice as any)[key] = +data[key];
               }
             }
           });
@@ -626,7 +631,7 @@ export default class TezToolsPrices {
    * @param exchangeRate the exchange rate of the currency for 1 XTZ
    * @returns an instance of the class
    */
-  updateInternalFiat(symbol: string, exchangeRate: number): TezToolsPrices {
+  updateInternalFiat(symbol: string, exchangeRate: number): TezToolsSDK {
     this.defaultFiat = symbol;
     this.xtzExchangeRate = exchangeRate;
 
@@ -746,7 +751,7 @@ export default class TezToolsPrices {
    * @param {Array<string>} [tokens] An array of token symbols to return
    * @returns a list of TokenData order bu their USD value
    */
-  orderByUsdValue(
+  private orderByUsdValue(
     dir: "asc" | "desc",
     tokens?: Array<string>
   ): Array<TokenData> {
@@ -760,6 +765,12 @@ export default class TezToolsPrices {
       }
     });
     if (tokens) {
+      // checks if all the tokens are available
+      const unknownTokens = tokens.filter(tk => !this.tokensList.includes(tk));
+      if (unknownTokens.length > 0) {
+        throw { message: "Unknown token(s)", list: unknownTokens };
+      }
+
       return sortedTokens.filter(tk =>
         tk.symbol ? tokens.includes(tk.symbol) : false
       );
@@ -797,11 +808,17 @@ export default class TezToolsPrices {
       fiat: this.defaultFiat
     }));
     if (tokens && tokens.length > 0) {
+      // checks if all the tokens are available
+      const unknownTokens = tokens.filter(tk => !this.tokensList.includes(tk));
+      if (unknownTokens.length > 0) {
+        throw { message: "Unknown token(s)", list: unknownTokens };
+      }
+
       return tokensCurrentPrices.filter(tk =>
         tk.symbol ? tokens.includes(tk.symbol) : false
       );
     } else {
-      return null;
+      return tokensCurrentPrices;
     }
   }
 }

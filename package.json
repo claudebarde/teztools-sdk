@@ -2,10 +2,11 @@
   "name": "teztools-sdk",
   "version": "1.0.0",
   "description": "A TypeScript SDK for the TezTools API",
-  "main": "index.js",
+  "source": "src/index.ts",
+  "main": "dist/main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc",
+    "test": "vitest",
+    "build": "parcel build",
     "watch": "nodemon --watch index.ts --exec tsc"
   },
   "repository": {
@@ -23,8 +24,12 @@
   },
   "homepage": "https://github.com/claudebarde/teztools-sdk#readme",
   "devDependencies": {
+    "@types/jest": "^27.4.1",
     "nodemon": "^2.0.15",
     "typescript": "^4.6.2",
-    "vitest": "^0.7.6"
+    "vitest": "^0.7.13"
+  },
+  "dependencies": {
+    "axios": "^0.26.1"
   }
 }

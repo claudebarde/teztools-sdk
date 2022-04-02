@@ -3,10 +3,11 @@
   "version": "1.0.0",
   "description": "A TypeScript SDK for the TezTools API",
   "source": "src/index.ts",
-  "main": "dist/main.js",
+  "main": "./dist/teztools-sdk.umd.js",
+  "module": "./dist/teztools-sdk.es.js",
   "scripts": {
     "test": "vitest",
-    "build": "parcel build",
+    "build": "vite build",
     "watch": "nodemon --watch index.ts --exec tsc"
   },
   "repository": {
@@ -27,6 +28,7 @@
     "@types/jest": "^27.4.1",
     "nodemon": "^2.0.15",
     "typescript": "^4.6.2",
+    "vite": "^2.9.1",
     "vitest": "^0.7.13"
   },
   "dependencies": {

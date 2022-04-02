@@ -109,10 +109,34 @@ export class TezToolsSDK {
   xtzExchangeRate: number | null | undefined = undefined;
   tokenTags: Array<string> = [];
   numberOfTokens = 0;
+  fetch: any;
 
   constructor() {
     this.tokensPrices = [];
     this.tokensList = [];
+
+    if (window) {
+      // browser usage
+      this.fetch = async (url: string) => {
+        const res = await this.fetch(url);
+        if (res) {
+          return await res.json();
+        } else {
+          return null;
+        }
+      };
+    } else {
+      // no browser usage
+      this.fetch = async (url: string) => {
+        const axios = (await import("axios")).default;
+        const res = await axios.get(url);
+        if (res) {
+          return res.data;
+        } else {
+          return null;
+        }
+      };
+    }
   }
 
   private is_number(val: any): boolean {

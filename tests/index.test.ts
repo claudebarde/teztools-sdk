@@ -1,4 +1,4 @@
-import { describe, expect, test } from "vitest";
+/*import { describe, expect, test } from "vitest";
 import { TezToolsSDK, tokenType } from "../src/index";
 
 let teztools: TezToolsSDK;
@@ -158,4 +158,4 @@ describe("Testing api.teztools.io/v1/prices", () => {
     const currentPrices_ = teztools.getCurrentPrice(params);
     expect(currentPrices_).toHaveLength(params.length);
   });
-});
+});*/
